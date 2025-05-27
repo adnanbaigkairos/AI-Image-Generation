@@ -197,38 +197,24 @@ export default function VisionForgeAIClient() {
             )}
           </CardHeader>
           <CardContent className="space-y-6">
-             {/* The FormField structure below for the enhanced prompt Textarea is what caused the context error.
-                 It uses FormItem, FormLabel, etc., which require a Form context, but this section
-                 was not wrapped in its own <Form {...someOtherForm}> provider.
-                 Using enhancerForm.control here with a name not in its schema is also an issue,
-                 but the primary error reported was due to the missing Form context.
-            */}
-            <FormField
-              control={enhancerForm.control} // This control is for the simple prompt form, not appropriate here.
-              name="enhancedPromptDisplay"   // This field name does not exist in the enhancerForm schema.
-              render={({ field }) => ( // field would be based on the incorrect control/name
-                <FormItem>
-                  <FormLabel htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none">
-                     {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      id={enhancedPromptTextareaId}
-                      placeholder="Enter your detailed prompt here..."
-                      value={enhancedPrompt ?? ''} // Direct state binding
-                      onChange={(e) => setEnhancedPrompt(e.target.value)} // Direct state update
-                      rows={5}
-                      className="border-accent focus:ring-accent"
-                      aria-describedby={`${enhancedPromptTextareaId}-description`}
-                    />
-                  </FormControl>
-                  <FormDescription id={`${enhancedPromptTextareaId}-description`}>
-                     This is the prompt that will be used for image generation. Edit as needed.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Enhanced Prompt Textarea - Using standard HTML elements with Tailwind for styling */}
+            <div className="space-y-2">
+              <label htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
+              </label>
+              <Textarea
+                id={enhancedPromptTextareaId}
+                placeholder="Enter your detailed prompt here..."
+                value={enhancedPrompt ?? ''} // Direct state binding
+                onChange={(e) => setEnhancedPrompt(e.target.value)} // Direct state update
+                rows={5}
+                className="border-accent focus:ring-accent" // Custom styling for emphasis
+                aria-describedby={`${enhancedPromptTextareaId}-description`}
+              />
+              <p id={`${enhancedPromptTextareaId}-description`} className="text-sm text-muted-foreground">
+                This is the prompt that will be used for image generation. Edit as needed.
+              </p>
+            </div>
 
             {/* Image Generation Form */}
             <Form {...generatorForm}>
