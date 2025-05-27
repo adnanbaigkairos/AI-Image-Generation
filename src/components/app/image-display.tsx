@@ -1,7 +1,8 @@
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Lightbulb, Image as ImageIcon } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, Lightbulb, Image as ImageIcon, Download } from 'lucide-react';
 import { LoadingSpinner } from './loading-spinner';
+import { Button } from '@/components/ui/button';
 
 interface ImageDisplayProps {
   imageUrl: string | null;
@@ -11,6 +12,18 @@ interface ImageDisplayProps {
 }
 
 export function ImageDisplay({ imageUrl, isLoading, error, suggestions }: ImageDisplayProps) {
+  const handleDownload = () => {
+    if (imageUrl) {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      // Suggest a filename for the download
+      link.download = 'neon-dream.png'; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="w-full aspect-video flex flex-col items-center justify-center shadow-lg bg-card/80 backdrop-blur-sm border-accent/30">
@@ -73,6 +86,12 @@ export function ImageDisplay({ imageUrl, isLoading, error, suggestions }: ImageD
             />
           </div>
         </CardContent>
+        <CardFooter className="p-4 justify-center">
+          <Button onClick={handleDownload} variant="outline" className="border-accent text-accent hover:bg-accent/10 hover:text-accent">
+            <Download className="mr-2 h-4 w-4" />
+            Download Image
+          </Button>
+        </CardFooter>
       </Card>
     );
   }
