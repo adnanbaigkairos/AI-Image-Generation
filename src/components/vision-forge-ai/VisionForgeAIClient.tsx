@@ -1,3 +1,4 @@
+
 // src/components/vision-forge-ai/VisionForgeAIClient.tsx
 'use client';
 
@@ -62,7 +63,7 @@ export default function VisionForgeAIClient() {
   const generatorForm = useForm<ImageGenerationFormValues>({
     resolver: zodResolver(imageGenerationSchema),
     defaultValues: {
-      style: '', 
+      style: '',
       aspectRatio: '1:1',
       batchMode: false,
       batchCount: 2,
@@ -73,7 +74,7 @@ export default function VisionForgeAIClient() {
 
   const handleEnhanceSubmit = async (values: PromptEnhancerFormValues) => {
     setIsEnhancing(true);
-    setGeneratedImageUrls([]); 
+    setGeneratedImageUrls([]);
     try {
       const result = await handleEnhancePromptAction(values);
       setEnhancedPrompt(result.enhancedPrompt);
@@ -177,11 +178,11 @@ export default function VisionForgeAIClient() {
       )}
 
       {/* Section for Enhanced Prompt and Image Generation */}
-      {(!isEnhancing || enhancedPrompt) && ( 
+      {(!isEnhancing || enhancedPrompt) && (
         <Card className="shadow-xl shadow-accent/10">
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
-              <Edit3 className="h-8 w-8 text-accent" /> 
+              <Edit3 className="h-8 w-8 text-accent" />
               {(enhancedPrompt && !isEnhancing) ? "Edit Your Enhanced Prompt" : "Or, Write Your Own Prompt"}
             </CardTitle>
             {enhancedPrompt && !isEnhancing && (
@@ -196,23 +197,38 @@ export default function VisionForgeAIClient() {
             )}
           </CardHeader>
           <CardContent className="space-y-6">
-             <div className="space-y-2">
-                <label htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none">
-                  {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
-                </label>
-                <Textarea
-                  id={enhancedPromptTextareaId}
-                  placeholder="Enter your detailed prompt here..."
-                  value={enhancedPrompt ?? ''}
-                  onChange={(e) => setEnhancedPrompt(e.target.value)}
-                  rows={5}
-                  className="border-accent focus:ring-accent"
-                  aria-describedby={`${enhancedPromptTextareaId}-description`}
-                />
-                <p id={`${enhancedPromptTextareaId}-description`} className="text-sm text-muted-foreground">
-                  This is the prompt that will be used for image generation. Edit as needed.
-                </p>
-              </div>
+             {/* The FormField structure below for the enhanced prompt Textarea is what caused the context error.
+                 It uses FormItem, FormLabel, etc., which require a Form context, but this section
+                 was not wrapped in its own <Form {...someOtherForm}> provider.
+                 Using enhancerForm.control here with a name not in its schema is also an issue,
+                 but the primary error reported was due to the missing Form context.
+            */}
+            <FormField
+              control={enhancerForm.control} // This control is for the simple prompt form, not appropriate here.
+              name="enhancedPromptDisplay"   // This field name does not exist in the enhancerForm schema.
+              render={({ field }) => ( // field would be based on the incorrect control/name
+                <FormItem>
+                  <FormLabel htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none">
+                     {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id={enhancedPromptTextareaId}
+                      placeholder="Enter your detailed prompt here..."
+                      value={enhancedPrompt ?? ''} // Direct state binding
+                      onChange={(e) => setEnhancedPrompt(e.target.value)} // Direct state update
+                      rows={5}
+                      className="border-accent focus:ring-accent"
+                      aria-describedby={`${enhancedPromptTextareaId}-description`}
+                    />
+                  </FormControl>
+                  <FormDescription id={`${enhancedPromptTextareaId}-description`}>
+                     This is the prompt that will be used for image generation. Edit as needed.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Image Generation Form */}
             <Form {...generatorForm}>
@@ -319,7 +335,7 @@ export default function VisionForgeAIClient() {
           </CardContent>
         </Card>
       )}
-      
+
       {isGenerating && (
          <div className="flex justify-center py-10">
            <LoadingSpinner text="Conjuring pixels..." size={48} />
