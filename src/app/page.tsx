@@ -142,7 +142,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background to-purple-950/30">
+    <div className="flex flex-col w-full flex-1 bg-gradient-to-br from-background to-purple-950/30">
       <Header />
       <main className="w-full flex-grow px-4 md:px-8 py-4 md:py-8 flex flex-col items-center gap-8">
         <div className="w-full max-w-2xl">
