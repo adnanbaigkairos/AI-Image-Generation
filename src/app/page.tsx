@@ -45,46 +45,33 @@ export default function HomePage() {
 
   useEffect(() => {
     // Save history to localStorage when it changes
-    if (history.length > 0) {
-      try {
+    try {
+      if (history.length > 0) {
         localStorage.setItem(IMAGE_HISTORY_STORAGE_KEY, JSON.stringify(history));
-      } catch (e: unknown) {
-        console.error("Failed to save image history to localStorage:", e);
-        let toastTitle = "History Save Error";
-        let toastDescription = "Could not save your latest creation to history. Please check browser settings.";
-
-        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
-          toastTitle = "Storage Full";
-          toastDescription = "Browser storage is full. Latest images may not be saved to history. Try clearing history or freeing up browser storage.";
-        } else if (e instanceof Error) {
-          toastDescription = `Could not save to history: ${e.message}. Check browser settings.`;
-        }
-        
-        toast({
-          title: toastTitle,
-          description: toastDescription,
-          variant: "destructive",
-        });
-      }
-    } else {
-      // History is empty, ensure localStorage is also cleared
-      try {
+      } else {
+        // History is empty, ensure localStorage is also cleared
         // Only remove if it exists, to avoid unnecessary localStorage access
         if (localStorage.getItem(IMAGE_HISTORY_STORAGE_KEY)) {
           localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
         }
-      } catch (e: unknown) {
-        console.error("Failed to clear image history from localStorage:", e);
-        let description = "Could not clear outdated history from storage. Browser settings might be restrictive.";
-        if (e instanceof Error) {
-          description = e.message;
-        }
-        toast({
-          title: "History Clear Error",
-          description: description,
-          variant: "warning", // Warning as it's less critical than save failure
-        });
       }
+    } catch (e: unknown) {
+      console.error("Failed to save or clear image history to/from localStorage:", e);
+      let toastTitle = "History Save Error";
+      let toastDescription = "Could not save your latest creation to history. Please check browser settings.";
+
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        toastTitle = "Storage Full";
+        toastDescription = "Browser storage is full. Latest images may not be saved to history. Try clearing history or freeing up browser storage.";
+      } else if (e instanceof Error) {
+        toastDescription = `Could not update history: ${e.message}. Check browser settings.`;
+      }
+      
+      toast({
+        title: toastTitle,
+        description: toastDescription,
+        variant: "destructive",
+      });
     }
   }, [history, toast]); // Depends on history and toast
 
@@ -157,7 +144,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background to-purple-950/30">
       <Header />
-      <main className="container mx-auto flex-grow p-4 md:p-8 flex flex-col items-center gap-8">
+      <main className="w-full flex-grow px-4 md:px-8 py-4 md:py-8 flex flex-col items-center gap-8">
         <div className="w-full max-w-2xl">
           <PromptForm onSubmit={handleSubmitPrompt} isLoading={isLoading} />
         </div>
