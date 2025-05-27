@@ -41,6 +41,8 @@ const imageGenerationSchema = z.object({
 type PromptEnhancerFormValues = z.infer<typeof promptEnhancerSchema>;
 type ImageGenerationFormValues = z.infer<typeof imageGenerationSchema>;
 
+const DEFAULT_STYLE_ITEM_VALUE = 'internal_default_style_value_key';
+
 export default function PromptForgeClient() {
   const { toast } = useToast();
   const [enhancedPrompt, setEnhancedPrompt] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export default function PromptForgeClient() {
   const generatorForm = useForm<ImageGenerationFormValues>({
     resolver: zodResolver(imageGenerationSchema),
     defaultValues: {
-      style: '',
+      style: '', // This will be the actual RHF value for "Default" style
       aspectRatio: '1:1',
       batchMode: false,
       batchCount: 2,
@@ -91,6 +93,7 @@ export default function PromptForgeClient() {
     setGeneratedImageUrls([]);
     try {
       let result;
+      // Use values.style directly, as it will be '' for default, or the selected style
       const basePrompt = `${enhancedPrompt}${values.style ? `, style: ${values.style}` : ''}${values.aspectRatio ? `, aspect ratio: ${values.aspectRatio}` : ''}`;
 
       if (values.batchMode) {
@@ -195,14 +198,24 @@ export default function PromptForgeClient() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-lg">Image Style</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={(selectedValue) => {
+                            // If user selects the item representing "Default", set form value to empty string
+                            // Otherwise, set to the selected style's value
+                            field.onChange(selectedValue === DEFAULT_STYLE_ITEM_VALUE ? '' : selectedValue);
+                          }}
+                          // Control the Select's value: if form value is empty string, use our internal key
+                          // Otherwise, use the form value. This ensures "Default" is shown when style is ''.
+                          value={field.value === '' ? DEFAULT_STYLE_ITEM_VALUE : field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select image style (optional)" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">Default</SelectItem>
+                            {/* Use the internal key for the "Default" option's value */}
+                            <SelectItem value={DEFAULT_STYLE_ITEM_VALUE}>Default</SelectItem>
                             <SelectItem value="photorealistic">Photorealistic</SelectItem>
                             <SelectItem value="anime">Anime</SelectItem>
                             <SelectItem value="digital-art">Digital Art</SelectItem>
