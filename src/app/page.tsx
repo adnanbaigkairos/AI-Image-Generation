@@ -23,38 +23,70 @@ export default function HomePage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load history from localStorage on initial mount
     try {
       const storedHistory = localStorage.getItem(IMAGE_HISTORY_STORAGE_KEY);
       if (storedHistory) {
         setHistory(JSON.parse(storedHistory));
       }
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to load image history from localStorage:", e);
+      let description = "Could not load your previous creations. Your browser's local storage might be disabled or full.";
+      if (e instanceof Error) {
+        description = e.message;
+      }
       toast({
         title: "History Hiccup",
-        description: "Could not load your previous creations. Your browser's local storage might be disabled or full.",
+        description: description,
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast]); // Depends only on toast, runs once on mount
 
   useEffect(() => {
-    try {
-      if (history.length > 0) {
+    // Save history to localStorage when it changes
+    if (history.length > 0) {
+      try {
         localStorage.setItem(IMAGE_HISTORY_STORAGE_KEY, JSON.stringify(history));
-      } else if (localStorage.getItem(IMAGE_HISTORY_STORAGE_KEY)) {
-        // Clear localStorage if history is emptied externally or by MAX_HISTORY_ITEMS limit
-        localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
+      } catch (e: unknown) {
+        console.error("Failed to save image history to localStorage:", e);
+        let toastTitle = "History Save Error";
+        let toastDescription = "Could not save your latest creation to history. Please check browser settings.";
+
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          toastTitle = "Storage Full";
+          toastDescription = "Browser storage is full. Latest images may not be saved to history. Try clearing history or freeing up browser storage.";
+        } else if (e instanceof Error) {
+          toastDescription = `Could not save to history: ${e.message}. Check browser settings.`;
+        }
+        
+        toast({
+          title: toastTitle,
+          description: toastDescription,
+          variant: "destructive",
+        });
       }
-    } catch (e) {
-      console.error("Failed to save image history to localStorage:", e);
-       toast({
-        title: "History Save Error",
-        description: "Could not save your latest creation to history. Your browser's local storage might be disabled or full.",
-        variant: "destructive",
-      });
+    } else {
+      // History is empty, ensure localStorage is also cleared
+      try {
+        // Only remove if it exists, to avoid unnecessary localStorage access
+        if (localStorage.getItem(IMAGE_HISTORY_STORAGE_KEY)) {
+          localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
+        }
+      } catch (e: unknown) {
+        console.error("Failed to clear image history from localStorage:", e);
+        let description = "Could not clear outdated history from storage. Browser settings might be restrictive.";
+        if (e instanceof Error) {
+          description = e.message;
+        }
+        toast({
+          title: "History Clear Error",
+          description: description,
+          variant: "warning", // Warning as it's less critical than save failure
+        });
+      }
     }
-  }, [history, toast]);
+  }, [history, toast]); // Depends on history and toast
 
   const handleSubmitPrompt = useCallback(async (prompt: string) => {
     setIsLoading(true);
@@ -103,16 +135,20 @@ export default function HomePage() {
   const handleClearHistory = () => {
     try {
       localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
-      setHistory([]);
+      setHistory([]); // Clear the React state as well
       toast({
         title: "🧹 History Cleared",
         description: "Your recent creations have been wiped.",
       });
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("Failed to clear image history from localStorage:", e);
+      let description = "Could not clear history. Local storage might be inaccessible.";
+       if (e instanceof Error) {
+          description = e.message;
+        }
       toast({
         title: "Clearing Error",
-        description: "Could not clear history. Local storage might be inaccessible.",
+        description: description,
         variant: "destructive",
       });
     }
