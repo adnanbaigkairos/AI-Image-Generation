@@ -4,75 +4,76 @@
 
 @layer base {
   :root {
-    --background: 267 54% 16%; /* #24123F Dark grayish-purple */
-    --foreground: 0 0% 98%; /* Light color for text on dark background */
+    /* New Dark Theme: Deep Space Blue/Black */
+    --background: 220 25% 8%; /* Very dark desaturated blue, near black */
+    --foreground: 210 40% 98%; /* Off-white for text */
 
-    --card: 267 50% 20%; /* Slightly lighter than background for cards */
-    --card-foreground: 0 0% 98%;
+    --card: 220 22% 11%; /* Slightly lighter than background for cards */
+    --card-foreground: 210 40% 98%;
 
-    --popover: 267 45% 18%; /* Popovers, dialogs */
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 20% 10%; /* Popovers, dialogs - similar to card or slightly darker */
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 279 69% 61%; /* #9D4EDD Saturated purple */
-    --primary-foreground: 0 0% 98%; /* Text on primary elements */
+    --primary: 190 70% 55%; /* Vibrant Cyan/Teal */
+    --primary-foreground: 210 40% 98%; /* Text on primary elements */
 
-    --secondary: 255 81% 60%; /* #623CEA Electric indigo - using this as secondary for now */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 15% 30%; /* Muted Dark Blue/Gray for secondary elements */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 267 30% 30%; /* Muted elements, subtle text */
-    --muted-foreground: 0 0% 70%; /* Lighter muted text */
+    --muted: 220 12% 45%; /* Muted elements, subtle text */
+    --muted-foreground: 210 20% 75%; /* Lighter muted text */
 
-    --accent: 255 81% 60%; /* #623CEA Electric indigo */
-    --accent-foreground: 0 0% 98%;
+    --accent: 210 80% 65%; /* Bright Blue for accents */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 72% 51%; /* A standard destructive red, adjusted for dark theme */
+    --destructive: 0 65% 55%; /* A slightly desaturated red for dark theme */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 267 30% 25%; /* Borders */
-    --input: 267 30% 22%; /* Input backgrounds */
-    --ring: 255 81% 65%; /* Focus rings, using a lighter accent */
+    --border: 220 20% 20%; /* Borders - subtle */
+    --input: 220 20% 15%; /* Input backgrounds */
+    --ring: 190 70% 65%; /* Focus rings, using a lighter primary */
 
-    --chart-1: 279 69% 61%;
-    --chart-2: 255 81% 60%;
-    --chart-3: 300 70% 70%;
-    --chart-4: 240 60% 65%;
-    --chart-5: 220 75% 55%;
+    --chart-1: 190 70% 55%;
+    --chart-2: 210 80% 65%;
+    --chart-3: 250 60% 60%; /* A contrasting purple for charts */
+    --chart-4: 160 50% 50%; /* A muted green for charts */
+    --chart-5: 30 70% 60%;  /* A warm orange for charts */
 
     --radius: 0.5rem;
 
-    /* Sidebar specific colors - can be adjusted if sidebar is heavily used */
-    --sidebar-background: 267 50% 18%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 279 69% 61%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 255 81% 60%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 267 30% 25%;
-    --sidebar-ring: 255 81% 65%;
+    /* Sidebar specific colors - adjusted for the new theme */
+    --sidebar-background: 220 22% 10%; /* Slightly distinct from main bg */
+    --sidebar-foreground: 210 30% 90%;
+    --sidebar-primary: 190 70% 55%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 80% 65%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 190 70% 65%;
   }
 
   /* Overwrite light theme variables if a .light class is ever applied,
      but we are defaulting to dark. */
   .light {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 220 25% 10%; /* Dark text for light theme */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 220 25% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 279 69% 51%; /* Darker purple for light theme */
+    --popover-foreground: 220 25% 10%;
+    --primary: 190 60% 45%; /* Darker Cyan/Teal for light theme */
     --primary-foreground: 0 0% 98%;
-    --secondary: 255 81% 50%; /* Darker indigo for light theme */
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 15% 85%; /* Light gray for secondary */
+    --secondary-foreground: 220 25% 10%;
     --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 255 81% 50%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 210 70% 55%; /* Darker Blue for light theme */
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 279 69% 51%;
+    --ring: 190 60% 45%;
   }
 }
 
@@ -86,7 +87,7 @@
   }
 }
 
-/* Custom glowing button style */
+/* Custom glowing button style - will use new --primary and --accent */
 @layer components {
   .btn-glow {
     @apply shadow-[0_0_8px_hsl(var(--primary)),_0_0_16px_hsl(var(--accent))] transition-all duration-300 ease-in-out;
