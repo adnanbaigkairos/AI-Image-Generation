@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { handleEnhancePromptAction, handleGenerateImageAction, handleGenerateBatchImagesAction } from '@/app/actions';
 import GeneratedImageDisplay from './GeneratedImageDisplay';
 import LoadingSpinner from '@/components/core/LoadingSpinner';
-import { Wand2, Image as ImageIcon, PlusCircle, MinusCircle, Edit3 } from 'lucide-react';
+import { Wand2, Image as ImageIcon, PlusCircle, MinusCircle } from 'lucide-react';
 
 const promptEnhancerSchema = z.object({
   simplePrompt: z.string().min(5, { message: 'Prompt must be at least 5 characters.' }).max(200, { message: 'Prompt cannot exceed 200 characters.' }),
@@ -75,6 +75,7 @@ export default function VisionForgeAIClient() {
   const handleEnhanceSubmit = async (values: PromptEnhancerFormValues) => {
     setIsEnhancing(true);
     setGeneratedImageUrls([]);
+    setEnhancedPrompt(null); // Clear previous enhanced prompt
     try {
       const result = await handleEnhancePromptAction(values);
       setEnhancedPrompt(result.enhancedPrompt);
@@ -88,7 +89,7 @@ export default function VisionForgeAIClient() {
 
   const handleGenerateSubmit = async (values: ImageGenerationFormValues) => {
     if (!enhancedPrompt) {
-      toast({ title: 'No Prompt', description: 'Please enhance a prompt first or write your own.', variant: 'destructive' });
+      toast({ title: 'No Prompt', description: 'Please enhance a prompt first.', variant: 'destructive' });
       return;
     }
     setIsGenerating(true);
@@ -120,7 +121,7 @@ export default function VisionForgeAIClient() {
             <Wand2 className="h-8 w-8 text-primary" />
             Step 1: Enhance Your Prompt
           </CardTitle>
-          <CardDescription>Turn your simple idea into a vivid, detailed prompt ready for AI magic. You can also edit the enhanced prompt below.</CardDescription>
+          <CardDescription>Turn your simple idea into a vivid, detailed prompt ready for AI magic.</CardDescription>
         </CardHeader>
         <Form {...enhancerForm}>
           <form onSubmit={enhancerForm.handleSubmit(handleEnhanceSubmit)}>
@@ -177,38 +178,30 @@ export default function VisionForgeAIClient() {
         </div>
       )}
 
-      {/* Section for Enhanced Prompt and Image Generation */}
-      {(!isEnhancing || enhancedPrompt) && (
+      {/* Section for Enhanced Prompt and Image Generation - Only shows if enhancedPrompt exists and not currently enhancing */}
+      {enhancedPrompt && !isEnhancing && (
         <Card className="shadow-xl shadow-accent/10">
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
-              <Edit3 className="h-8 w-8 text-accent" />
-              {(enhancedPrompt && !isEnhancing) ? "Edit Your Enhanced Prompt" : "Or, Write Your Own Prompt"}
+              <ImageIcon className="h-8 w-8 text-accent" />
+              Step 2: Generate Your Image
             </CardTitle>
-            {enhancedPrompt && !isEnhancing && (
-                <CardDescription>
-                    The AI has enhanced your prompt. Feel free to refine it below or use it as is.
-                </CardDescription>
-            )}
-             {!enhancedPrompt && !isEnhancing && (
-                <CardDescription>
-                    No prompt enhanced yet. You can type your detailed prompt directly below to generate images.
-                </CardDescription>
-            )}
+            <CardDescription>
+                Your prompt has been enhanced. You can refine it below or use it as is to generate images.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Enhanced Prompt Textarea - Using standard HTML elements with Tailwind for styling */}
             <div className="space-y-2">
               <label htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
+                Enhanced Prompt
               </label>
               <Textarea
                 id={enhancedPromptTextareaId}
-                placeholder="Enter your detailed prompt here..."
-                value={enhancedPrompt ?? ''} // Direct state binding
+                placeholder="Your enhanced prompt will appear here..." // Placeholder can be updated
+                value={enhancedPrompt} // Direct state binding
                 onChange={(e) => setEnhancedPrompt(e.target.value)} // Direct state update
                 rows={5}
-                className="border-accent focus:ring-accent" // Custom styling for emphasis
+                className="border-accent focus:ring-accent"
                 aria-describedby={`${enhancedPromptTextareaId}-description`}
               />
               <p id={`${enhancedPromptTextareaId}-description`} className="text-sm text-muted-foreground">
@@ -216,7 +209,6 @@ export default function VisionForgeAIClient() {
               </p>
             </div>
 
-            {/* Image Generation Form */}
             <Form {...generatorForm}>
               <form onSubmit={generatorForm.handleSubmit(handleGenerateSubmit)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
