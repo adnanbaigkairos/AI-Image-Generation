@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import * as z from 'zod';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -49,6 +49,7 @@ export default function VisionForgeAIClient() {
   const [generatedImageUrls, setGeneratedImageUrls] = useState<string[]>([]);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const enhancedPromptTextareaId = useId();
 
   const enhancerForm = useForm<PromptEnhancerFormValues>({
     resolver: zodResolver(promptEnhancerSchema),
@@ -176,7 +177,7 @@ export default function VisionForgeAIClient() {
       )}
 
       {/* Section for Enhanced Prompt and Image Generation */}
-      {(!isEnhancing || enhancedPrompt) && ( // Show this section if not enhancing OR if an enhanced prompt already exists
+      {(!isEnhancing || enhancedPrompt) && ( 
         <Card className="shadow-xl shadow-accent/10">
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
@@ -195,23 +196,23 @@ export default function VisionForgeAIClient() {
             )}
           </CardHeader>
           <CardContent className="space-y-6">
-             <FormItem>
-                <FormLabel className="text-lg">
+             <div className="space-y-2">
+                <label htmlFor={enhancedPromptTextareaId} className="text-lg font-medium leading-none">
                   {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Enter your detailed prompt here..."
-                    value={enhancedPrompt ?? ''}
-                    onChange={(e) => setEnhancedPrompt(e.target.value)}
-                    rows={5}
-                    className="border-accent focus:ring-accent"
-                  />
-                </FormControl>
-                <FormDescription>
+                </label>
+                <Textarea
+                  id={enhancedPromptTextareaId}
+                  placeholder="Enter your detailed prompt here..."
+                  value={enhancedPrompt ?? ''}
+                  onChange={(e) => setEnhancedPrompt(e.target.value)}
+                  rows={5}
+                  className="border-accent focus:ring-accent"
+                  aria-describedby={`${enhancedPromptTextareaId}-description`}
+                />
+                <p id={`${enhancedPromptTextareaId}-description`} className="text-sm text-muted-foreground">
                   This is the prompt that will be used for image generation. Edit as needed.
-                </FormDescription>
-              </FormItem>
+                </p>
+              </div>
 
             {/* Image Generation Form */}
             <Form {...generatorForm}>
