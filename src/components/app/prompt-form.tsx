@@ -1,10 +1,11 @@
+
 "use client";
 
 import { useState, useTransition } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Sparkles, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sparkles, AlertCircle, Info } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PromptFormProps {
   onSubmit: (prompt: string) => Promise<void>;
@@ -37,6 +38,10 @@ export function PromptForm({ onSubmit, isLoading }: PromptFormProps) {
           <Sparkles className="mr-2 h-6 w-6 text-accent" />
           Enter Your Vision
         </CardTitle>
+        <CardDescription className="flex items-start text-sm text-muted-foreground pt-1">
+          <Info className="mr-2 h-4 w-4 shrink-0 mt-1 text-accent/80" />
+          Describe the image you want to create. Be specific for best results (e.g., style, colors, objects, mood).
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

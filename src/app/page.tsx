@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -8,8 +9,10 @@ import { ImageHistory } from '@/components/app/image-history';
 import { handleGenerateImageAction } from './actions';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from '@/components/ui/separator';
-import { IMAGE_HISTORY_STORAGE_KEY, MAX_HISTORY_ITEMS } from '@/lib/constants';
+import { Button } from '@/components/ui/button';
+import { IMAGE_HISTORY_STORAGE_KEY, MAX_HISTORY_ITEMS, APP_NAME } from '@/lib/constants';
 import type { GenerateImageResult } from '@/lib/types';
+import { Trash2 } from 'lucide-react';
 
 export default function HomePage() {
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
@@ -27,28 +30,37 @@ export default function HomePage() {
       }
     } catch (e) {
       console.error("Failed to load image history from localStorage:", e);
+      toast({
+        title: "History Hiccup",
+        description: "Could not load your previous creations. Your browser's local storage might be disabled or full.",
+        variant: "destructive",
+      });
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     try {
       if (history.length > 0) {
         localStorage.setItem(IMAGE_HISTORY_STORAGE_KEY, JSON.stringify(history));
       } else if (localStorage.getItem(IMAGE_HISTORY_STORAGE_KEY)) {
-        // Clear localStorage if history is emptied
+        // Clear localStorage if history is emptied externally or by MAX_HISTORY_ITEMS limit
         localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
       }
     } catch (e) {
       console.error("Failed to save image history to localStorage:", e);
+       toast({
+        title: "History Save Error",
+        description: "Could not save your latest creation to history. Your browser's local storage might be disabled or full.",
+        variant: "destructive",
+      });
     }
-  }, [history]);
+  }, [history, toast]);
 
   const handleSubmitPrompt = useCallback(async (prompt: string) => {
     setIsLoading(true);
     setError(null);
     setSuggestions(null);
-    // Keep current image visible while loading new one, or clear it:
-    // setGeneratedImageUrl(null); 
+    // setGeneratedImageUrl(null); // Option: Clear current image while loading
 
     toast({
       title: "🚀 Beam Me Up, Scotty!",
@@ -88,6 +100,24 @@ export default function HomePage() {
       });
   };
 
+  const handleClearHistory = () => {
+    try {
+      localStorage.removeItem(IMAGE_HISTORY_STORAGE_KEY);
+      setHistory([]);
+      toast({
+        title: "🧹 History Cleared",
+        description: "Your recent creations have been wiped.",
+      });
+    } catch (e) {
+      console.error("Failed to clear image history from localStorage:", e);
+      toast({
+        title: "Clearing Error",
+        description: "Could not clear history. Local storage might be inaccessible.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background to-purple-950/30">
       <Header />
@@ -110,13 +140,26 @@ export default function HomePage() {
             <Separator className="my-4 md:my-8 bg-primary/30" />
             <div className="w-full">
               <ImageHistory images={history} onImageSelect={handleSelectFromHistory} />
+              <div className="mt-6 flex justify-center">
+                <Button variant="outline" onClick={handleClearHistory} className="border-accent text-accent hover:bg-accent/10 hover:text-accent">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Clear History
+                </Button>
+              </div>
             </div>
           </>
         )}
       </main>
-      <footer className="py-6 text-center text-xs text-muted-foreground border-t border-primary/10">
-        <p>&copy; {new Date().getFullYear()} Neon Dreams. All rights reserved.</p>
-        <p>Powered by AI and Cyberpunk Aesthetics.</p>
+      <footer className="py-8 text-center text-sm text-muted-foreground border-t border-primary/10">
+        <div className="space-y-1">
+          <p>&copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
+          <p>Powered by AI and Cyberpunk Aesthetics.</p>
+          <div className="flex justify-center gap-4 mt-2">
+            <a href="/terms-of-service" className="hover:text-primary transition-colors">Terms of Service</a>
+            <span className="text-muted-foreground/50">|</span>
+            <a href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</a>
+          </div>
+        </div>
       </footer>
     </div>
   );
