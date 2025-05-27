@@ -1,6 +1,5 @@
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 // import { getFirestore } from 'firebase/firestore';
 // import { getStorage } from 'firebase/storage';
 
@@ -23,11 +22,10 @@ if (!getApps().length) {
   app = getApp();
 }
 
-const auth = getAuth(app);
 // const db = getFirestore(app);
 // const storage = getStorage(app);
 
-export { app, auth /*, db, storage */ };
+export { app /*, db, storage */ };
 
 // IMPORTANT:
 // 1. Create a Firebase project at https://console.firebase.google.com/
@@ -42,4 +40,3 @@ export { app, auth /*, db, storage */ };
 //    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 //    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1234567890
 //    NEXT_PUBLIC_FIREBASE_APP_ID=1:1234567890:web:abcdef123456
-// 6. Ensure you have enabled Email/Password sign-in method in Firebase Authentication.
