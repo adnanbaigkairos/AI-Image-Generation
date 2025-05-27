@@ -25,7 +25,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <Logo />
           </div>
           <CardTitle className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">
-            Welcome to PromptForge
+            Welcome to VisionForge
           </CardTitle>
           <CardDescription className="text-lg text-muted-foreground px-4 leading-relaxed">
             Unleash your creativity and generate stunning AI images with intuitive prompt engineering tools.
@@ -46,7 +46,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         </CardContent>
       </Card>
        <footer className="absolute bottom-6 text-center text-xs text-muted-foreground/60 w-full">
-        <p>&copy; {new Date().getFullYear()} PromptForge. Crafted with AI.</p>
+        <p>&copy; {new Date().getFullYear()} VisionForge. Crafted with AI.</p>
       </footer>
     </div>
   );

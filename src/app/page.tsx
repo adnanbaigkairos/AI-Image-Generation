@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PromptForgeClient from '@/components/prompt-forge/PromptForgeClient';
+import VisionForgeClient from '@/components/vision-forge/VisionForgeClient';
 import LandingPage from '@/components/landing/LandingPage';
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
 
   // useEffect(() => {
   //   // Example: Check if user has "started" before, could use localStorage
-  //   // const hasStarted = localStorage.getItem('promptForgeStarted');
+  //   // const hasStarted = localStorage.getItem('visionForgeStarted');
   //   // if (hasStarted) {
   //   //   setShowApp(true);
   //   // }
@@ -22,7 +22,7 @@ export default function HomePage() {
   // }, []);
 
   const handleGetStarted = () => {
-    // Optionally, persist this choice: localStorage.setItem('promptForgeStarted', 'true');
+    // Optionally, persist this choice: localStorage.setItem('visionForgeStarted', 'true');
     setShowApp(true);
   };
 
@@ -36,7 +36,7 @@ export default function HomePage() {
   // }
 
   if (showApp) {
-    return <PromptForgeClient />;
+    return <VisionForgeClient />;
   }
 
   return <LandingPage onGetStarted={handleGetStarted} />;
