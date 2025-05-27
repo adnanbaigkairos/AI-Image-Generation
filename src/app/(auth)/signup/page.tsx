@@ -5,17 +5,11 @@ import AuthForm from '@/components/auth/AuthForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { auth } from '@/lib/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import type * as z from 'zod';
+import type { AuthFormValues } from '@/components/auth/AuthForm';
 import Link from 'next/link';
 
-// Re-inferring schema type here or importing from AuthForm if exported
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
 export default function SignupPage() {
-  const handleSignup = async (values: z.infer<typeof formSchema>) => {
+  const handleSignup = async (values: AuthFormValues) => {
     await createUserWithEmailAndPassword(auth, values.email, values.password);
   };
 

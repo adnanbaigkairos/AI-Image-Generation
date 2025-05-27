@@ -19,14 +19,16 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const formSchema = z.object({
+export const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
+export type AuthFormValues = z.infer<typeof formSchema>;
+
 type AuthFormProps = {
   mode: 'login' | 'signup';
-  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  onSubmit: (values: AuthFormValues) => Promise<void>;
 };
 
 export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
@@ -34,7 +36,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<AuthFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
@@ -42,7 +44,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
     },
   });
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: AuthFormValues) => {
     setIsLoading(true);
     try {
       await onSubmit(values);
