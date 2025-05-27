@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'VisionForge - AI Image Generator',
-  description: 'Enhance your prompts and generate stunning AI images with VisionForge.',
+  title: 'VisionForge AI - Image Generator',
+  description: 'Enhance your prompts and generate stunning AI images with VisionForge AI.',
 };
 
 export default function RootLayout({
