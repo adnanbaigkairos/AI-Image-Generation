@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import * as z from 'zod';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { handleEnhancePromptAction, handleGenerateImageAction, handleGenerateBatchImagesAction } from '@/app/actions';
 import GeneratedImageDisplay from './GeneratedImageDisplay';
 import LoadingSpinner from '@/components/core/LoadingSpinner';
-import { Wand2, Image as ImageIcon, PlusCircle, MinusCircle } from 'lucide-react';
+import { Wand2, Image as ImageIcon, PlusCircle, MinusCircle, Edit3 } from 'lucide-react';
 
 const promptEnhancerSchema = z.object({
   simplePrompt: z.string().min(5, { message: 'Prompt must be at least 5 characters.' }).max(200, { message: 'Prompt cannot exceed 200 characters.' }),
@@ -86,7 +86,7 @@ export default function VisionForgeAIClient() {
 
   const handleGenerateSubmit = async (values: ImageGenerationFormValues) => {
     if (!enhancedPrompt) {
-      toast({ title: 'No Prompt', description: 'Please enhance a prompt first.', variant: 'destructive' });
+      toast({ title: 'No Prompt', description: 'Please enhance a prompt first or write your own.', variant: 'destructive' });
       return;
     }
     setIsGenerating(true);
@@ -118,7 +118,7 @@ export default function VisionForgeAIClient() {
             <Wand2 className="h-8 w-8 text-primary" />
             Step 1: Enhance Your Prompt
           </CardTitle>
-          <CardDescription>Turn your simple idea into a vivid, detailed prompt ready for AI magic.</CardDescription>
+          <CardDescription>Turn your simple idea into a vivid, detailed prompt ready for AI magic. You can also edit the enhanced prompt below.</CardDescription>
         </CardHeader>
         <Form {...enhancerForm}>
           <form onSubmit={enhancerForm.handleSubmit(handleEnhanceSubmit)}>
@@ -175,121 +175,147 @@ export default function VisionForgeAIClient() {
         </div>
       )}
 
-      {enhancedPrompt && !isEnhancing && (
+      {/* Section for Enhanced Prompt and Image Generation */}
+      {(!isEnhancing || enhancedPrompt) && ( // Show this section if not enhancing OR if an enhanced prompt already exists
         <Card className="shadow-xl shadow-accent/10">
           <CardHeader>
             <CardTitle className="text-2xl md:text-3xl flex items-center gap-2">
-              <ImageIcon className="h-8 w-8 text-accent" />
-              Step 2: Generate Your Image
+              <Edit3 className="h-8 w-8 text-accent" /> 
+              {(enhancedPrompt && !isEnhancing) ? "Edit Your Enhanced Prompt" : "Or, Write Your Own Prompt"}
             </CardTitle>
-            <div className="mt-2 p-4 bg-muted/50 rounded-md border border-border">
-              <p className="text-sm font-semibold text-foreground/80 mb-1">Enhanced Prompt:</p>
-              <p className="text-foreground italic">{enhancedPrompt}</p>
-            </div>
+            {enhancedPrompt && !isEnhancing && (
+                <CardDescription>
+                    The AI has enhanced your prompt. Feel free to refine it below or use it as is.
+                </CardDescription>
+            )}
+             {!enhancedPrompt && !isEnhancing && (
+                <CardDescription>
+                    No prompt enhanced yet. You can type your detailed prompt directly below to generate images.
+                </CardDescription>
+            )}
           </CardHeader>
-          <Form {...generatorForm}>
-            <form onSubmit={generatorForm.handleSubmit(handleGenerateSubmit)}>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={generatorForm.control}
-                    name="style"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-lg">Image Style</FormLabel>
-                        <Select
-                          onValueChange={(selectedValue) => {
-                            field.onChange(selectedValue === DEFAULT_STYLE_ITEM_VALUE ? '' : selectedValue);
-                          }}
-                          value={field.value === '' ? DEFAULT_STYLE_ITEM_VALUE : field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select image style (optional)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={DEFAULT_STYLE_ITEM_VALUE}>Default</SelectItem>
-                            <SelectItem value="photorealistic">Photorealistic</SelectItem>
-                            <SelectItem value="anime">Anime</SelectItem>
-                            <SelectItem value="digital-art">Digital Art</SelectItem>
-                            <SelectItem value="cyberpunk">Cyberpunk</SelectItem>
-                            <SelectItem value="fantasy">Fantasy</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+          <CardContent className="space-y-6">
+             <FormItem>
+                <FormLabel className="text-lg">
+                  {enhancedPrompt ? "Enhanced Prompt" : "Your Custom Prompt"}
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter your detailed prompt here..."
+                    value={enhancedPrompt ?? ''}
+                    onChange={(e) => setEnhancedPrompt(e.target.value)}
+                    rows={5}
+                    className="border-accent focus:ring-accent"
                   />
-                  <FormField
+                </FormControl>
+                <FormDescription>
+                  This is the prompt that will be used for image generation. Edit as needed.
+                </FormDescription>
+              </FormItem>
+
+            {/* Image Generation Form */}
+            <Form {...generatorForm}>
+              <form onSubmit={generatorForm.handleSubmit(handleGenerateSubmit)}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <FormField
+                        control={generatorForm.control}
+                        name="style"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-lg">Image Style</FormLabel>
+                            <Select
+                            onValueChange={(selectedValue) => {
+                                field.onChange(selectedValue === DEFAULT_STYLE_ITEM_VALUE ? '' : selectedValue);
+                            }}
+                            value={field.value === '' ? DEFAULT_STYLE_ITEM_VALUE : field.value}
+                            >
+                            <FormControl>
+                                <SelectTrigger>
+                                <SelectValue placeholder="Select image style (optional)" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value={DEFAULT_STYLE_ITEM_VALUE}>Default</SelectItem>
+                                <SelectItem value="photorealistic">Photorealistic</SelectItem>
+                                <SelectItem value="anime">Anime</SelectItem>
+                                <SelectItem value="digital-art">Digital Art</SelectItem>
+                                <SelectItem value="cyberpunk">Cyberpunk</SelectItem>
+                                <SelectItem value="fantasy">Fantasy</SelectItem>
+                            </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={generatorForm.control}
+                        name="aspectRatio"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-lg">Aspect Ratio</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                <SelectValue placeholder="Select aspect ratio" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="1:1">Square (1:1)</SelectItem>
+                                <SelectItem value="16:9">Landscape (16:9)</SelectItem>
+                                <SelectItem value="4:3">Standard (4:3)</SelectItem>
+                                <SelectItem value="9:16">Portrait (9:16)</SelectItem>
+                                <SelectItem value="3:4">Portrait (3:4)</SelectItem>
+                            </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    </div>
+                    <FormField
                     control={generatorForm.control}
-                    name="aspectRatio"
+                    name="batchMode"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-lg">Aspect Ratio</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select aspect ratio" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="1:1">Square (1:1)</SelectItem>
-                            <SelectItem value="16:9">Landscape (16:9)</SelectItem>
-                            <SelectItem value="4:3">Standard (4:3)</SelectItem>
-                            <SelectItem value="9:16">Portrait (9:16)</SelectItem>
-                            <SelectItem value="3:4">Portrait (3:4)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={generatorForm.control}
-                  name="batchMode"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-lg">Batch Mode</FormLabel>
-                        <FormDescription>Generate multiple image variations at once.</FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                {watchBatchMode && (
-                  <FormField
-                    control={generatorForm.control}
-                    name="batchCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-lg">Number of Images (2-4)</FormLabel>
-                        <div className="flex items-center gap-2">
-                           <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(Math.max(2, field.value - 1))} disabled={field.value <= 2}>
-                             <MinusCircle className="h-4 w-4" />
-                           </Button>
-                           <Input {...field} type="number" readOnly className="w-16 text-center" />
-                           <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(Math.min(4, field.value + 1))} disabled={field.value >= 4}>
-                             <PlusCircle className="h-4 w-4" />
-                           </Button>
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm mt-6">
+                        <div className="space-y-0.5">
+                            <FormLabel className="text-lg">Batch Mode</FormLabel>
+                            <FormDescription>Generate multiple image variations at once.</FormDescription>
                         </div>
-                        <FormMessage />
-                      </FormItem>
+                        <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                        </FormItem>
                     )}
-                  />
-                )}
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isGenerating} className="btn-glow w-full sm:w-auto">
-                  {isGenerating ? <LoadingSpinner text="Generating..." /> : <> <ImageIcon className="mr-2 h-5 w-5" /> Generate Image(s) </>}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
+                    />
+                    {watchBatchMode && (
+                    <FormField
+                        control={generatorForm.control}
+                        name="batchCount"
+                        render={({ field }) => (
+                        <FormItem className="mt-6">
+                            <FormLabel className="text-lg">Number of Images (2-4)</FormLabel>
+                            <div className="flex items-center gap-2">
+                            <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(Math.max(2, field.value - 1))} disabled={field.value <= 2}>
+                                <MinusCircle className="h-4 w-4" />
+                            </Button>
+                            <Input {...field} type="number" readOnly className="w-16 text-center" />
+                            <Button type="button" variant="outline" size="icon" onClick={() => field.onChange(Math.min(4, field.value + 1))} disabled={field.value >= 4}>
+                                <PlusCircle className="h-4 w-4" />
+                            </Button>
+                            </div>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    )}
+                <CardFooter className="px-0 pt-8 pb-0">
+                    <Button type="submit" disabled={isGenerating || !enhancedPrompt || enhancedPrompt.trim().length < 5} className="btn-glow w-full sm:w-auto">
+                    {isGenerating ? <LoadingSpinner text="Generating..." /> : <> <ImageIcon className="mr-2 h-5 w-5" /> Generate Image(s) </>}
+                    </Button>
+                </CardFooter>
+              </form>
+            </Form>
+          </CardContent>
         </Card>
       )}
       
